@@ -1,0 +1,9 @@
+- Create README
+- Create LICENSE
+- Publish it
+
+v1.0.0
+
+- CLI for parsing arguments - https://docs.rs/clap/latest/clap/_derive/_tutorial/index.html
+- --help
+- <config> positional argument (if not provided: default to ~/.envyrc.yaml)
