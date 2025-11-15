@@ -7,15 +7,31 @@
 //!   - Place a `.envyrc.yaml` YAML file in your home directory with key-value pairs or arrays.
 //!   - Run this program to output shell export statements for each variable.
 
+use clap::Parser; // For command-line argument parsing
 use dirs; // Provides functions to get common directories (like home, config, etc.)
 use std::error::Error; // Trait for error handling in Rust
 use std::fs::File; // For working with files (open, create, etc.)
 use std::io::Read; // Trait for reading from files and other sources
 use yaml_rust::YamlLoader;
-use yaml_rust::yaml::Hash; // Hash type used for YAML mapping in yaml-rust // Function to load and parse YAML documents
+use yaml_rust::yaml::Hash; // Hash type used for YAML mapping in yaml-rust // Function to load and parse YAML documents // For command-line argument parsing
 
 // Configuration file name in the user's home directory
 const CONF_FILE_NAME: &str = ".envyrc.yaml";
+
+#[derive(Parser)]
+#[command(name = "envy")]
+#[command(version = "1.0.0")]
+#[command(about = "Environment Variable Exporter", long_about = None)]
+/// Command-line interface arguments for the application.
+///
+/// # Fields
+///
+/// * `config_file` - An optional path to a YAML configuration file. If provided,
+///   the application will load settings from this file. If `None`, default settings
+///   or alternative configuration methods will be used.
+struct Cli {
+    config_file: Option<String>, // Path to the configuration file (YAML format)
+}
 
 // Returns the current user's home directory as a `String`, if available.
 //
@@ -26,22 +42,39 @@ fn get_home_directory() -> Option<String> {
     Some(dirs::home_dir()?.to_str()?.to_string())
 }
 
-/// Loads environment variables from a YAML file in the user's home directory.
+/// Loads environment variables from a YAML configuration file.
 ///
-/// This function attempts to locate and open a `.envyrc.yaml` YAML file in the current user's home directory.
-/// It parses the file and returns its contents as a `yaml_rust::yaml::Hash`.
+/// This function attempts to locate and open a YAML configuration file. If `config_file` is provided,
+/// it uses that path; otherwise, it defaults to `.envyrc.yaml` in the user's home directory.
+/// The file is parsed and its contents are returned as a `yaml_rust::yaml::Hash`.
+///
+/// # Arguments
+///
+/// * `config_file` - Optional path to a YAML configuration file. If `None`, defaults to `~/.envyrc.yaml`.
 ///
 /// # Returns
 ///
 /// * `Ok(Hash)` containing the key-value pairs from the YAML file if successful.
-/// * `Err(Box<dyn Error>)` if the home directory cannot be determined, the file cannot be read, or the YAML is invalid.
-fn get_env_vars() -> Result<Hash, Box<dyn Error>> {
-    // get home directory
-    let home_dir =
-        get_home_directory().ok_or("couldn't determine home directory from environment")?;
+/// * `Err(Box<dyn Error>)` if the home directory cannot be determined (when no path is provided),
+///   the file cannot be read, or the YAML is invalid.
+fn get_env_vars(config_file: Option<String>) -> Result<Hash, Box<dyn Error>> {
+    // determine configuration file path
+    let conf_file_path: String;
+
+    // if config_file is provided, use it
+    match config_file {
+        Some(path) => {
+            conf_file_path = path;
+        }
+        None => {
+            // get home directory
+            let home_dir =
+                get_home_directory().ok_or("couldn't determine home directory from environment")?;
+            conf_file_path = format!("{}/{}", home_dir, CONF_FILE_NAME);
+        }
+    }
 
     // load YAML file
-    let conf_file_path = format!("{}/{}", home_dir, CONF_FILE_NAME);
     let mut conf_file = File::open(&conf_file_path)?;
     let mut conf_file_data = String::new();
     conf_file.read_to_string(&mut conf_file_data)?;
@@ -78,8 +111,11 @@ macro_rules! print_value {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // parse command-line arguments
+    let cli = Cli::parse();
+
     // 1. get a hash table from the YAML configuration file
-    let env_vars = get_env_vars()?;
+    let env_vars = get_env_vars(cli.config_file)?;
 
     // 2. render each value in the resulting hash table as a shell export statement
     for (k, v) in env_vars.iter() {
