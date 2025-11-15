@@ -1,0 +1,31 @@
+# Test configuration file for envy
+# This file demonstrates both string values and array values
+
+# Simple string values
+MY_VAR: "hello world"
+DATABASE_URL: "postgres://localhost:5432/testdb"
+API_KEY: "test-api-key-12345"
+LOG_LEVEL: "debug"
+APP_ENV: "development"
+
+# Array values (converted to colon-separated strings)
+PATH:
+  - "/usr/local/bin"
+  - "/usr/bin"
+  - "/bin"
+  - "/usr/sbin"
+
+CUSTOM_PATH:
+  - "/opt/myapp/bin"
+  - "/opt/tools/bin"
+  - "$HOME/.local/bin"
+
+PYTHONPATH:
+  - "/opt/python/lib"
+  - "/usr/local/lib/python3.11"
+  - "./src"
+
+# Additional test variables
+SERVICE_URL: "http://localhost:8080"
+REDIS_HOST: "127.0.0.1"
+REDIS_PORT: "6379"
