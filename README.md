@@ -11,6 +11,7 @@ A simple environment variable exporter that loads variables from a YAML configur
 - 📝 **YAML Configuration**: Define environment variables in a simple YAML file
 - 🔗 **Array Support**: Automatically converts arrays to colon-separated strings (perfect for PATH-like variables)
 - 🏠 **Home Directory Integration**: Reads configuration from `~/.envyrc.yaml` by default
+- 📂 **Custom Config Path**: Specify a custom configuration file path via command-line argument
 - 🚀 **Shell Integration Ready**: Outputs standard `export` statements for easy sourcing
 
 ## Installation
@@ -48,7 +49,11 @@ CUSTOM_PATH:
 2. Run `envy` to generate export statements:
 
 ```bash
+# Use default config file (~/.envyrc.yaml)
 envy
+
+# Or specify a custom config file
+envy path/to/config.yaml
 ```
 
 Output:
@@ -88,6 +93,38 @@ VARIABLE_NAME:
 ```
 
 Arrays are automatically converted to colon-separated strings (e.g., `value1:value2:value3`).
+
+## Command-Line Usage
+
+```bash
+envy [CONFIG_FILE]
+```
+
+### Arguments
+
+- `CONFIG_FILE` (optional): Path to a YAML configuration file. If not provided, defaults to `~/.envyrc.yaml`
+
+### Options
+
+- `--help`: Display help information
+- `--version`: Display version information
+
+### Examples
+
+```bash
+# Use default config
+envy
+
+# Use custom config file
+envy ./my-env.yaml
+envy /etc/myapp/env.yaml
+
+# Get help
+envy --help
+
+# Check version
+envy --version
+```
 
 ## Integration with Shell
 
@@ -136,15 +173,13 @@ cargo test
 
 ## Dependencies
 
+- [clap](https://crates.io/crates/clap) - Command-line argument parser
 - [dirs](https://crates.io/crates/dirs) - Platform-specific standard locations
 - [yaml-rust](https://crates.io/crates/yaml-rust) - YAML parser
 
 ## Roadmap
 
-See [TODO](TODO) for planned features, including:
-
-- CLI argument parsing with `clap`
-- Custom configuration file path support
+See [TODO](TODO) for planned features.
 
 ## License
 
