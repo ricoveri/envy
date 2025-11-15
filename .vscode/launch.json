@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'envy'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=envy",
+                    "--package=envy"
+                ],
+                "filter": {
+                    "name": "envy",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug with test.yaml",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=envy",
+                    "--package=envy"
+                ],
+                "filter": {
+                    "name": "envy",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "files/test.yaml"
+            ],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
