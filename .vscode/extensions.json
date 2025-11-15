@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "rust-lang.rust-analyzer",
-        "cordx56.rustowl-vscode"
+        "cordx56.rustowl-vscode",
+        "vadimcn.vscode-lldb"
     ]
 }
