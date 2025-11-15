@@ -177,10 +177,6 @@ cargo test
 - [dirs](https://crates.io/crates/dirs) - Platform-specific standard locations
 - [yaml-rust](https://crates.io/crates/yaml-rust) - YAML parser
 
-## Roadmap
-
-See [TODO](TODO) for planned features.
-
 ## License
 
 **Copyright (c) 2025 Alejandro Ricoveri**
