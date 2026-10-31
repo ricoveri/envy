@@ -20,7 +20,7 @@ const CONF_FILE_NAME: &str = ".envyrc.yaml";
 
 #[derive(Parser)]
 #[command(name = "envy")]
-#[command(version = "1.0.0")]
+#[command(version)]
 #[command(about = "Environment Variable Exporter", long_about = None)]
 /// Command-line interface arguments for the application.
 ///

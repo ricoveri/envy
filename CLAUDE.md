@@ -27,5 +27,5 @@ cargo clippy / cargo fmt            # lint / format
 - Output is plain `export NAME="value"` via the `print_value!` macro. No escaping of `"`, `$`, or backticks, so values are shell-expanded when eval'd (e.g. `$HOME` in `files/test.yaml` is intentional/expected to expand).
 - Output order follows YAML mapping order.
 - Errors propagate from `main` as `Box<dyn Error>` (missing file, bad YAML, no home dir).
-- Version mismatch: `Cargo.toml` says `0.1.0`, but the clap `#[command(version = "1.0.0")]` in `main.rs` is what `--version` prints.
+- Version: `--version` comes from `Cargo.toml` via `#[command(version)]`. Bump it there only.
 - Uses `yaml-rust` 0.4 (unmaintained crate), not `serde_yaml`.
