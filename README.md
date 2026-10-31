@@ -11,7 +11,8 @@ A simple environment variable exporter that loads variables from a YAML configur
 - 📝 **YAML Configuration**: Define environment variables in a simple YAML file
 - 🔗 **Array Support**: Automatically converts arrays to colon-separated strings (perfect for PATH-like variables)
 - 🏠 **Home Directory Integration**: Reads configuration from `~/.envyrc.yaml` by default
-- 📂 **Custom Config Path**: Specify a custom configuration file path via command-line argument
+- 🗂️ **Drop-in Directory**: Split config across files in `~/.envy.d/`, read in alphanumeric order, with later files overriding earlier ones
+- 📂 **Custom Config Path**: Specify a custom configuration file or directory via command-line argument
 - 🚀 **Shell Integration Ready**: Outputs standard `export` statements for easy sourcing
 
 ## Installation
@@ -94,15 +95,30 @@ VARIABLE_NAME:
 
 Arrays are automatically converted to colon-separated strings (e.g., `value1:value2:value3`).
 
+## Multiple Config Files
+
+With no argument, envy reads `~/.envyrc.yaml` (if present), then every `*.yaml` / `*.yml` file in `~/.envy.d/` (if present). At least one of them must exist.
+
+- Files in a directory are read in plain byte-wise order of their names, so `10-x.yaml` comes **before** `2-y.yaml`. Use zero-padded prefixes (`00-`, `10-`, `20-`) to control order.
+- If a variable is defined in more than one file, the file read **last** wins. Arrays replace earlier values; they are not appended.
+- Hidden files, subdirectories and files with other extensions are ignored.
+- An empty file is allowed. A file that can't be read or parsed aborts the run with an error naming it.
+
+```
+~/.envy.d/
+├── 10-base.yaml       # LOG_LEVEL: "info"
+└── 20-local.yaml      # LOG_LEVEL: "debug"   <- wins
+```
+
 ## Command-Line Usage
 
 ```bash
-envy [CONFIG_FILE]
+envy [CONFIG]
 ```
 
 ### Arguments
 
-- `CONFIG_FILE` (optional): Path to a YAML configuration file. If not provided, defaults to `~/.envyrc.yaml`
+- `CONFIG` (optional): Path to a YAML configuration file, or to a directory of YAML files (read as described above). If not provided, defaults to `~/.envyrc.yaml` followed by `~/.envy.d/`
 
 ### Options
 
@@ -114,6 +130,9 @@ envy [CONFIG_FILE]
 ```bash
 # Use default config
 envy
+
+# Use a directory of config files
+envy ~/.envy.d
 
 # Use custom config file
 envy ./my-env.yaml

@@ -1,0 +1,5 @@
+# Base values
+APP_ENV: "development"
+LOG_LEVEL: "info"
+CUSTOM_PATH:
+  - "/opt/base/bin"
