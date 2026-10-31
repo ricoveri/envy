@@ -100,7 +100,7 @@ Arrays are automatically converted to colon-separated strings (e.g., `value1:val
 With no argument, envy reads `~/.envyrc.yaml` (if present), then every `*.yaml` / `*.yml` file in `~/.envy.d/` (if present). At least one of them must exist.
 
 - Files in a directory are read in plain byte-wise order of their names, so `10-x.yaml` comes **before** `2-y.yaml`. Use zero-padded prefixes (`00-`, `10-`, `20-`) to control order.
-- If a variable is defined in more than one file, the file read **last** wins. Arrays replace earlier values; they are not appended.
+- If a variable is defined in more than one file, the file read **last** wins. The exception is arrays: if a variable is an array in several files, the items are **merged** (concatenated in read order, e.g. `/a:/b` then `/c` gives `/a:/b:/c`). If the types differ (string vs array), the later file simply overrides.
 - Hidden files, subdirectories and files with other extensions are ignored.
 - An empty file is allowed. A file that can't be read or parsed aborts the run with an error naming it.
 

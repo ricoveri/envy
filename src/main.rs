@@ -10,14 +10,15 @@
 //!   - A file argument: that file only.
 //!   - A directory argument: every `*.yaml` / `*.yml` file in it, in lexicographic file name order.
 //!
-//! When several files define the same variable, the one read last wins.
+//! When several files define the same variable, the one read last wins, except that arrays
+//! defined in several files are concatenated in read order.
 
 use clap::Parser; // For command-line argument parsing
 use std::error::Error; // Trait for error handling in Rust
 use std::fs;
 use std::path::{Path, PathBuf};
-use yaml_rust::YamlLoader;
-use yaml_rust::yaml::Hash; // Hash type used for YAML mapping in yaml-rust
+use yaml_rust::yaml::Hash;
+use yaml_rust::{Yaml, YamlLoader}; // Hash type used for YAML mapping in yaml-rust
 
 // Configuration file name in the user's home directory
 const CONF_FILE_NAME: &str = ".envyrc.yaml";
@@ -122,13 +123,32 @@ fn config_sources(arg: Option<String>) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     }
 }
 
-/// Loads every source in order and merges them; later files override earlier ones.
+/// Merges `other` into `base`.
+///
+/// If a key is an array on both sides, the items are concatenated (`other`'s after `base`'s).
+/// Otherwise the value from `other` overrides the one in `base`.
+fn merge_into(base: &mut Hash, other: Hash) {
+    for (k, v) in other {
+        match v {
+            Yaml::Array(new) => {
+                if let Some(Yaml::Array(old)) = base.get_mut(&k) {
+                    old.extend(new);
+                } else {
+                    base.insert(k, Yaml::Array(new));
+                }
+            }
+            v => {
+                base.insert(k, v);
+            }
+        }
+    }
+}
+
+/// Loads every source in order and merges them (see `merge_into`).
 fn get_env_vars(config: Option<String>) -> Result<Hash, Box<dyn Error>> {
     let mut merged = Hash::new();
     for path in config_sources(config)? {
-        for (k, v) in load_file(&path)? {
-            merged.insert(k, v);
-        }
+        merge_into(&mut merged, load_file(&path)?);
     }
     Ok(merged)
 }
@@ -229,11 +249,24 @@ mod tests {
     }
 
     #[test]
-    fn array_override_replaces() {
+    fn arrays_are_merged_in_file_order() {
         let d = tempdir().unwrap();
         write(d.path(), "10.yaml", "P:\n  - /a\n  - /b\n");
         write(d.path(), "20.yaml", "P:\n  - /c\n");
-        assert_eq!(run_dir(d.path()), vec![r#"export P="/c""#]);
+        assert_eq!(run_dir(d.path()), vec![r#"export P="/a:/b:/c""#]);
+    }
+
+    #[test]
+    fn array_and_string_do_not_merge() {
+        let d = tempdir().unwrap();
+        write(d.path(), "10.yaml", "P:\n  - /a\n");
+        write(d.path(), "20.yaml", "P: /s\n");
+        write(d.path(), "30.yaml", "Q: x\n");
+        write(d.path(), "40.yaml", "Q:\n  - /q\n");
+        assert_eq!(
+            run_dir(d.path()),
+            vec![r#"export P="/s""#, r#"export Q="/q""#]
+        );
     }
 
     #[test]

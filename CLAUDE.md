@@ -24,7 +24,7 @@ cargo clippy / cargo fmt            # lint / format
 ## Behavior to know before editing
 
 - Config sources (`config_sources`): optional positional arg, which may be a file or a directory. A directory contributes its `*.yaml`/`*.yml` files (no hidden files or subdirs) sorted byte-wise by name (`10-x` before `2-y`). With no arg: `~/.envyrc.yaml` (`CONF_FILE_NAME`) first, then `~/.envy.d/` (`CONF_DIR_NAME`); either may be missing but not both.
-- Merge: files are read in order and later ones override earlier ones per key (arrays replace, never append). An overridden key moves to the end of the output. Per file, only the **first** YAML document is used, its root must be a mapping, and an empty file is fine. Any bad file aborts the run.
+- Merge: files are read in order and later ones override earlier ones per key (`merge_into`), except that a key that is an array in both is concatenated (earlier items first, no dedupe); string/array type mismatches just override. A string-overridden key moves to the end of the output; a merged array keeps its first position. Per file, only the **first** YAML document is used, its root must be a mapping, and an empty file is fine. Any bad file aborts the run.
 - Values: string → printed as-is; array → items joined with `:` (PATH-style). Non-string array items and non-string scalars (ints, bools, nested maps) are **silently skipped**, not errored.
 - Output is plain `export NAME="value"` via the `print_value!` macro. No escaping of `"`, `$`, or backticks, so values are shell-expanded when eval'd (e.g. `$HOME` in `files/test.yaml` is intentional/expected to expand).
 - Output order follows YAML mapping order.
